@@ -23,7 +23,7 @@ export default async function handler(req, res) {
       method: "POST",
       headers: {
         "content-type": "application/json",
-        "x-api-key": process.env.ANTHROPIC_API_KEY,
+        "x-api-key": (process.env.ANTHROPIC_API_KEY || "").trim(),
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
@@ -34,9 +34,11 @@ export default async function handler(req, res) {
       }),
     });
     const data = await r.json();
-    const reply = data.content?.[0]?.text || "Sorry, something went wrong. Please try again.";
+    const reply =
+      data.content?.[0]?.text ||
+      "Error: " + (data.error?.message || "unknown");
     res.status(200).json({ reply });
   } catch (e) {
-    res.status(500).json({ reply: "Sorry, something went wrong. Please try again." });
+    res.status(500).json({ reply: "Error: " + e.message });
   }
 }
